@@ -25,6 +25,7 @@ const Lang = imports.lang;
 const Main = imports.ui.main;
 const Mainloop = imports.mainloop;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
+const MessageTray = imports.ui.messageTray;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 const Soup = imports.gi.Soup;
@@ -62,6 +63,9 @@ const RssFeedButton = new Lang.Class({
 
         this._httpSession = null;
         this._startIndex = 0;
+
+        this._source = new MessageTray.Source("RSS Feed", 'application-rss+xml-symbolic');
+        Main.messageTray.add(this._source);
 
         // top panel button
         let icon = new St.Icon({
@@ -321,6 +325,15 @@ const RssFeedButton = new Lang.Class({
                 item.Title = rssParser.Items[i].Title;
                 item.HttpLink = rssParser.Items[i].HttpLink;
                 rssFeed.Items.push(item);
+            }
+            // check if new feeds were received
+            if (this._feedsArray[position] && this._feedsArray[position].length != rssFeed.length)
+            {
+            	// send new notification
+            	let banner = "Publisher: " + rssFeed.Publisher.Title;
+            	let notification = new MessageTray.Notification(this._source, "New RSS Feed available.", banner);
+            	this._source.notify(notification);
+            	
             }
             this._feedsArray[position] = rssFeed;
         }
