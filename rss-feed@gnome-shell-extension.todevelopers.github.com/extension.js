@@ -4,6 +4,7 @@
  * Copyright (C) 2015
  *     Tomas Gazovic <gazovic.tomasgmail.com>,
  *     Janka Gazovicova <jana.gazovicova@gmail.com>
+ *     Pedro Caldeira <pdrocaldeira@gmail.com>
  *
  * This file is part of gnome-shell-extension-rss-feed.
  *
@@ -326,9 +327,13 @@ const RssFeedButton = new Lang.Class({
                 item.HttpLink = rssParser.Items[i].HttpLink;
                 rssFeed.Items.push(item);
             }
+            global.log("Downloading");
+            if(this._currentFirstItemTitle) global.log("Current First Item Title: "+this._currentFirstItemTitle);
+            if(rssFeed.Items[0]) global.log("New First Item Title: "+rssFeed.Items[0].Title);
             // check if new feeds were received
-            if (this._feedsArray[position] && this._feedsArray[position].length != rssFeed.length)
+            if (this._currentFirstItemTitle != rssFeed.Items[0].Title)
             {
+            	global.log("I should be notifying");
             	// send new notification
             	let banner = "Publisher: " + rssFeed.Publisher.Title;
             	let notification = new MessageTray.Notification(this._source, "New RSS Feed available.", banner);
@@ -336,6 +341,7 @@ const RssFeedButton = new Lang.Class({
             	
             }
             this._feedsArray[position] = rssFeed;
+            this._currentFirstItemTitle = rssFeed.Items[0].Title;
         }
 
         this._refreshExtensionUI();
